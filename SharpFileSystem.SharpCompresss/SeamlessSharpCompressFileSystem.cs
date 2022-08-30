@@ -26,7 +26,7 @@ namespace SharpFileSystem.SharpCompress
         {
             return path.IsFile
                 && ArchiveExtensions.Contains(path.GetExtension())
-                && !HasArchive(path)// HACK: Disable ability to open archives inside archives (SharpCompress's stream does not have the ability to trace at the moment).
+                && !HasArchive(path) // HACK: Disable ability to open archives inside archives (SharpCompress's stream does not have the ability to trace at the moment).
                 ;
         }
 

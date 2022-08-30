@@ -17,11 +17,12 @@ namespace TestSFS
 
         static void Main(string[] args)
         {
-            embeddedFS();
-            CreateMemoryFile();
-            ReadZipFS();
-            WriteZipFS();
-            Read7ZipFS();
+            //embeddedFS();
+            //CreateMemoryFile();
+            //ReadZipFS();
+            //WriteZipFS();
+            //Read7ZipFS();
+            ReadSeamLess();
 
         }
 
@@ -176,6 +177,33 @@ namespace TestSFS
                 // File should still exist and have content.
                 Assert.True(sharpCompressFileSystem.Exists(filePath));
                 using (var xStream = sharpCompressFileSystem.OpenFile(filePath, FileAccess.Read))
+                {
+                    var readContent = new byte[128];
+                    int read = xStream.Read(readContent, 0, readContent.Length);
+
+                    Assert.Equal(10, read);
+                    string value = Encoding.ASCII.GetString(readContent, 0, read);
+                    Assert.Equal("7z content", value);
+                }
+            }
+        }
+
+        static void ReadSeamLess()
+        {
+            var regularFS = new PhysicalFileSystem(".");
+            var seamlessFS = new SeamlessSharpCompressFileSystem(regularFS);
+            var files = seamlessFS.GetEntities(FileSystemPath.Root);
+
+            FileSystemPath xPath = FileSystemPath.Root.AppendFile("x");
+            FileSystemPath filePath = FileSystemPath.Root.AppendFile("file");
+            {
+
+                // File shouldn’t exist prior to creation.
+                Assert.False(seamlessFS.Exists(xPath));
+
+                // File should still exist and have content.
+                Assert.True(seamlessFS.Exists(filePath));
+                using (var xStream = seamlessFS.OpenFile(filePath, FileAccess.Read))
                 {
                     var readContent = new byte[128];
                     int read = xStream.Read(readContent, 0, readContent.Length);

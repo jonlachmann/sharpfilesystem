@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Xml.Schema;
 
 namespace SharpFileSystem.FileSystems
 {
@@ -55,6 +56,16 @@ namespace SharpFileSystem.FileSystems
             return path.ParentPath.AppendDirectory(path.EntityName + ArchiveDirectorySeparator);
         }
 
+        private ICollection<FileSystemPath> ArchiveFileToFiles(FileSystemPath path)
+        {
+            if (!path.IsFile)
+                throw new ArgumentException("The specified path is not a file.");
+
+            var arch = FileSystemEntity.Create(FileSystem, path);
+            var archiveFS = GetArchiveFs((File) arch);
+            return archiveFS.FileSystem.GetEntities(FileSystemPath.Root);
+        }
+
         private FileSystemPath GetRelativePath(FileSystemPath path)
         {
             string s = path.ToString();
@@ -71,15 +82,18 @@ namespace SharpFileSystem.FileSystems
 
         protected bool TryGetArchivePath(FileSystemPath path, out FileSystemPath archivePath)
         {
-            string p = path.ToString();
-            int sindex = p.LastIndexOf(ArchiveDirectorySeparator.ToString() + FileSystemPath.DirectorySeparator);
-            if (sindex < 0)
+            if (!path.IsRoot)
             {
-                archivePath = path;
-                return false;
+                var entities = GetEntities(path.ParentPath);
+                if (entities.Any(x => x.Path == path.Path))
+                {
+                    var entity = entities.First(x => x.Path == path.Path);
+                    archivePath = FileSystemPath.Parse(FileSystemPath.DirectorySeparator + entity.InArchive);
+                    return true;
+                }
             }
-            archivePath = FileSystemPath.Parse(p.Substring(0, sindex));
-            return true;
+            archivePath = path;
+            return false;
         }
 
         protected FileSystemReference Refer(FileSystemPath path)
@@ -92,7 +106,7 @@ namespace SharpFileSystem.FileSystems
 
         private FileSystemReference CreateArchiveReference(FileSystemPath archiveFile)
         {
-            return CreateReference((File)GetActualLocation(archiveFile));
+            return CreateReference((File) GetActualLocation(archiveFile));
         }
 
         private FileSystemReference CreateReference(File file)
@@ -108,7 +122,7 @@ namespace SharpFileSystem.FileSystems
             FileSystemPath archivePath;
             if (!TryGetArchivePath(path, out archivePath))
                 return FileSystemEntity.Create(FileSystem, path);
-            var archiveFile = (File)GetActualLocation(archivePath);
+            var archiveFile = (File) GetActualLocation(archivePath);
             FileSystemUsage usage = GetArchiveFs(archiveFile);
             return FileSystemEntity.Create(usage.FileSystem, GetRelativePath(path));
         }
@@ -147,13 +161,26 @@ namespace SharpFileSystem.FileSystems
                     parentPath = ArchiveFileToDirectory(parentPath);
                 else
                     parentPath = FileSystemPath.Root;
-                var entities = new LinkedList<FileSystemPath>();
+                var entities = new List<FileSystemPath>();
                 foreach (var ep in fileSystem.GetEntities(GetRelativePath(path)))
                 {
                     var newep = parentPath.AppendPath(ep.ToString().Substring(1));
-                    entities.AddLast(newep);
                     if (IsArchiveFile(fileSystem, newep))
-                        entities.AddLast(newep.ParentPath.AppendDirectory(newep.EntityName + ArchiveDirectorySeparator));
+                    {
+                        if (false)
+                        {
+                            entities.Add(
+                                newep.ParentPath.AppendDirectory(newep.EntityName + ArchiveDirectorySeparator));
+                        }
+                        else
+                        {
+                            entities.AddRange(ArchiveFileToFiles(ep));
+                        }
+                    }
+                    else
+                    {
+                        entities.Add(newep);
+                    }
                 }
                 return entities;
             }

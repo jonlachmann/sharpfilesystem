@@ -10,22 +10,26 @@ namespace SharpFileSystem.SharpCompress
     {
         private IArchive _archive;
 
+        private string _archiveName;
+
         private ICollection<FileSystemPath> _entities = new List<FileSystemPath>();
 
-        private SharpCompressFileSystem(IArchive archive)
+        private SharpCompressFileSystem(IArchive archive, string archiveName = "")
         {
             _archive = archive;
+            _archiveName = archiveName;
             foreach (var file in _archive.Entries)
                 AddEntity(GetVirtualFilePath(file));
         }
 
-        public SharpCompressFileSystem(Stream stream)
-            : this(ArchiveFactory.Open(stream))
+        public SharpCompressFileSystem(Stream stream, string archiveName = "")
+            : this(ArchiveFactory.Open(stream), archiveName)
         {
         }
 
         public SharpCompressFileSystem(string physicalPath)
-            : this(ArchiveFactory.Open(physicalPath))
+            : this(ArchiveFactory.Open(physicalPath),
+                physicalPath.Substring(physicalPath.LastIndexOf(FileSystemPath.DirectorySeparator) + 1))
         {
         }
 
@@ -61,7 +65,7 @@ namespace SharpFileSystem.SharpCompress
             string path = FileSystemPath.DirectorySeparator + archiveFile.Key.Replace(Path.DirectorySeparatorChar, FileSystemPath.DirectorySeparator);
             if (archiveFile.IsDirectory && path[path.Length - 1] != FileSystemPath.DirectorySeparator)
                 path += FileSystemPath.DirectorySeparator;
-            return FileSystemPath.Parse(path);
+            return FileSystemPath.Parse(path, _archiveName);
         }
 
         public ICollection<FileSystemPath> GetEntities(FileSystemPath path)

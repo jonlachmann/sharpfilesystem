@@ -13,9 +13,16 @@ namespace SharpFileSystem
 
         private readonly string _path;
 
+        private readonly string _inArchive;
+
         public string Path
         {
             get { return _path ?? "/"; }
+        }
+
+        public string InArchive
+        {
+            get { return _inArchive; }
         }
 
         public bool IsDirectory
@@ -70,9 +77,10 @@ namespace SharpFileSystem
             Root = new FileSystemPath(DirectorySeparator.ToString());
         }
 
-        private FileSystemPath(string path)
+        private FileSystemPath(string path, string inArchive="")
         {
             _path = path;
+            _inArchive = inArchive;
         }
 
         public static implicit operator FileSystemPath(string path) {
@@ -92,7 +100,7 @@ namespace SharpFileSystem
             return s[0] == DirectorySeparator;
         }
 
-        public static FileSystemPath Parse(string s)
+        public static FileSystemPath Parse(string s, string inArchive = "")
         {
             if (s == null)
                 throw new ArgumentNullException("s");
@@ -100,7 +108,7 @@ namespace SharpFileSystem
                 throw new ParseException(s, "Path is not rooted");
             if (s.Contains(string.Concat(DirectorySeparator, DirectorySeparator)))
                 throw new ParseException(s, "Path contains double directory-separators.");
-            return new FileSystemPath(s);
+            return new FileSystemPath(s, inArchive);
         }
 
         public FileSystemPath AppendPath(string relativePath)
