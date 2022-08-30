@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using SharpFileSystem;
 using SharpFileSystem.FileSystems;
-using SharpFileSystem.SevenZip;
+using SharpFileSystem.SharpCompress;
 using Xunit;
 
 namespace TestSFS
@@ -21,7 +21,7 @@ namespace TestSFS
             CreateMemoryFile();
             ReadZipFS();
             WriteZipFS();
-            // Read7ZipFS();
+            Read7ZipFS();
 
         }
 
@@ -139,7 +139,7 @@ namespace TestSFS
         static void ReadZipFS()
                 {
                     FileSystemPath MemRootFilePath = FileSystemPath.Root.AppendFile("x");
-                    var zipFileSystem = SharpZipLibFileSystem.Open(System.IO.File.Open(@".\test.zip",FileMode.Open));
+                    var zipFileSystem = SharpZipLibFileSystem.Open(System.IO.File.Open(@"test.zip",FileMode.Open));
                     // File shouldn’t exist prior to creation.
                     Assert.False(zipFileSystem.Exists(MemRootFilePath));
 
@@ -164,18 +164,18 @@ namespace TestSFS
 
         static void Read7ZipFS()
         {
-            string zipFileName = @".\test.7z";
+            string zipFileName = @"test.7z";
             FileSystemPath xPath = FileSystemPath.Root.AppendFile("x");
             FileSystemPath filePath = FileSystemPath.Root.AppendFile("file");
-            using (var szipFileSystem = new SevenZipFileSystem(System.IO.File.Open(zipFileName, FileMode.Open)))
+            using (var sharpCompressFileSystem = new SharpCompressFileSystem(System.IO.File.Open(zipFileName, FileMode.Open)))
             {
 
                 // File shouldn’t exist prior to creation.
-                Assert.False(szipFileSystem.Exists(xPath));
+                Assert.False(sharpCompressFileSystem.Exists(xPath));
 
                 // File should still exist and have content.
-                Assert.True(szipFileSystem.Exists(filePath));
-                using (var xStream = szipFileSystem.OpenFile(filePath, FileAccess.Read))
+                Assert.True(sharpCompressFileSystem.Exists(filePath));
+                using (var xStream = sharpCompressFileSystem.OpenFile(filePath, FileAccess.Read))
                 {
                     var readContent = new byte[128];
                     int read = xStream.Read(readContent, 0, readContent.Length);

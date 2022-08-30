@@ -1,36 +1,31 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using SevenZip;
 using System.IO;
-using System.Threading;
-using SharpFileSystem;
-using SharpFileSystem.IO;
-using Directory = SharpFileSystem.Directory;
-using File = SharpFileSystem.File;
+using SharpCompress.Archives;
 
-namespace SharpFileSystem.SevenZip
+namespace SharpFileSystem.SharpCompress
 {
-    public class SevenZipFileSystem: IFileSystem
+    public class SharpCompressFileSystem: IFileSystem
     {
-        private SevenZipExtractor _extractor;
+        private IArchive _archive;
 
         private ICollection<FileSystemPath> _entities = new List<FileSystemPath>();
 
-        private SevenZipFileSystem(SevenZipExtractor extractor)
+        private SharpCompressFileSystem(IArchive archive)
         {
-            _extractor = extractor;
-            foreach (var file in _extractor.ArchiveFileData)
+            _archive = archive;
+            foreach (var file in _archive.Entries)
                 AddEntity(GetVirtualFilePath(file));
         }
 
-        public SevenZipFileSystem(Stream stream)
-            : this(new SevenZipExtractor(stream))
+        public SharpCompressFileSystem(Stream stream)
+            : this(ArchiveFactory.Open(stream))
         {
         }
 
-        public SevenZipFileSystem(string physicalPath)
-            : this(new SevenZipExtractor(physicalPath))
+        public SharpCompressFileSystem(string physicalPath)
+            : this(ArchiveFactory.Open(physicalPath))
         {
         }
 
@@ -42,14 +37,28 @@ namespace SharpFileSystem.SevenZip
                 AddEntity(path.ParentPath);
         }
 
-        public string GetSevenZipPath(FileSystemPath path)
+        public string GetArchivePath(FileSystemPath path)
         {
             return path.ToString().Remove(0, 1);
         }
 
-        public FileSystemPath GetVirtualFilePath(ArchiveFileInfo archiveFile)
+        private IArchiveEntry GetEntryFromPath(FileSystemPath path)
         {
-            string path = FileSystemPath.DirectorySeparator + archiveFile.FileName.Replace(Path.DirectorySeparatorChar, FileSystemPath.DirectorySeparator);
+            var fileName = path.ToString().Remove(0, 1);
+            foreach (var entry in _archive.Entries)
+            {
+                if (entry.Key == fileName)
+                {
+                    return entry;
+                }
+            }
+
+            return null;
+        }
+
+        public FileSystemPath GetVirtualFilePath(IArchiveEntry archiveFile)
+        {
+            string path = FileSystemPath.DirectorySeparator + archiveFile.Key.Replace(Path.DirectorySeparatorChar, FileSystemPath.DirectorySeparator);
             if (archiveFile.IsDirectory && path[path.Length - 1] != FileSystemPath.DirectorySeparator)
                 path += FileSystemPath.DirectorySeparator;
             return FileSystemPath.Parse(path);
@@ -77,12 +86,9 @@ namespace SharpFileSystem.SevenZip
             if (access == FileAccess.Write)
                 throw new NotSupportedException();
 
-            Stream s = new ProducerConsumerStream();
-            ThreadPool.QueueUserWorkItem(delegate
-                                             {
-                                                 _extractor.ExtractFile(GetSevenZipPath(path), s);
-                                                 s.Close();
-                                             });
+            var entry = GetEntryFromPath(path);
+
+            Stream s = entry.OpenEntryStream();
             return s;
         }
 
@@ -100,7 +106,7 @@ namespace SharpFileSystem.SevenZip
 
         public void Dispose()
         {
-            _extractor.Dispose();
+            _archive.Dispose();
         }
     }
 }

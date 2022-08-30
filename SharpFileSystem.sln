@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpFileSystem.Tests", "Sh
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestSFS", "TestSFS\TestSFS.csproj", "{2D48DC1D-A065-44C0-B6DB-379DE7FE0287}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpFileSystem.SharpCompress", "SharpFileSystem.SharpCompresss\SharpFileSystem.SharpCompress.csproj", "{715E11D6-6D45-4481-8D2B-F0ADF6A4494B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +43,10 @@ Global
 		{2D48DC1D-A065-44C0-B6DB-379DE7FE0287}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2D48DC1D-A065-44C0-B6DB-379DE7FE0287}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2D48DC1D-A065-44C0-B6DB-379DE7FE0287}.Release|Any CPU.Build.0 = Release|Any CPU
+		{715E11D6-6D45-4481-8D2B-F0ADF6A4494B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{715E11D6-6D45-4481-8D2B-F0ADF6A4494B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{715E11D6-6D45-4481-8D2B-F0ADF6A4494B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{715E11D6-6D45-4481-8D2B-F0ADF6A4494B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 	EndGlobalSection

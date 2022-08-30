@@ -1,13 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
+        <TargetFrameworks>net6.0;netstandard2.1</TargetFrameworks>
         <OutputType>Exe</OutputType>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
     </PropertyGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\SharpCoreFileSystem\SharpCoreFileSystem.csproj" />
       <ProjectReference Include="..\SharpFileSystem.SevenZip\SharpFileSystem.SevenZip.csproj" />
+      <ProjectReference Include="..\SharpFileSystem.SharpCompresss\SharpFileSystem.SharpCompress.csproj" />
     </ItemGroup>
 
     <ItemGroup>
