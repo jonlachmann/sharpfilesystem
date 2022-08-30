@@ -68,7 +68,7 @@ namespace SharpFileSystem
                 int index = parentPath.LastIndexOf(DirectorySeparator, lookaheadCount - 1, lookaheadCount);
                 Debug.Assert(index >= 0);
                 parentPath = parentPath.Remove(index + 1);
-                return new FileSystemPath(parentPath);
+                return new FileSystemPath(parentPath, _inArchive);
             }
         }
 
